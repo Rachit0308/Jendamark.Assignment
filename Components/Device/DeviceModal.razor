@@ -1,0 +1,83 @@
+﻿@using Jendamark.Assignment.Models
+@using Jendamark.Assignment.Services.Interfaces
+@inject IDeviceService DeviceService
+
+<ModalContent Centered="true">
+    <ModalHeader>
+        <ModalTitle>Add Device</ModalTitle>
+        <CloseButton />
+    </ModalHeader>
+    <ModalBody>
+        <Field>
+            <FieldLabel>Name</FieldLabel>
+            <input type="text" class="form-control" @bind-value="newDevice.Name" placeholder="Enter Name..." />
+        </Field>
+        <Field>
+            <FieldLabel>Device Type</FieldLabel>
+            <select class="form-control" @bind="newDevice.DeviceType">
+                @foreach (DeviceType type in Enum.GetValues(typeof(DeviceType)))
+                {
+                    <option value="@type">@type</option>
+                }
+            </select>
+        </Field>
+        @* Conditional Fields for LaserCutter *@
+        @if (newDevice.DeviceType == DeviceType.LaserCutter)
+        {
+            <div>
+                <FieldLabel> Laser Intensity:</FieldLabel>
+                <input type="number" class="form-control" @bind-value="newDevice.LaserIntensity" placeholder="Enter Intensity..." />
+            </div>
+            <div>
+                <FieldLabel>Safety Check Required:</FieldLabel>
+                @* <InputCheckbox @bind-Value="SafetyCheckRequiredWrapper" /> *@
+                <Check TValue="bool" @bind-Checked="@SafetyCheckRequiredWrapper" />
+            </div>
+        }
+        @* Conditional Fields for QualityAssuranceScanner *@
+        @if (newDevice.DeviceType == DeviceType.QualityAssuranceScanner)
+        {
+            <div>
+                <FieldLabel>Validation Code:</FieldLabel>
+                <TextEdit @bind-Value="newDevice.ValidationCode" />
+            </div>
+            <div>
+                <FieldLabel>Outcome Status:</FieldLabel>
+                <TextEdit @bind-Value="newDevice.OutcomeStatus" />
+            </div>
+        }
+    </ModalBody>
+    <ModalFooter>
+        <Button Color="Color.Secondary" Clicked="@closeModal">Close</Button>
+        <Button Color="Color.Primary" Clicked="@SaveDevice">Save Changes</Button>
+    </ModalFooter>
+</ModalContent>
+
+@code {
+    private Device newDevice = new Device();
+    private string name { get; set; } = "";
+    private bool SafetyCheckRequiredWrapper
+    {
+        get => newDevice.SafetyCheckRequired ?? false;
+        set => newDevice.SafetyCheckRequired = value;
+    }
+    private void HandleValidSubmit()
+    {
+        DeviceService.AddDevice(newDevice);
+        newDevice = new Device(); // Reset for new entry
+    }
+    [Parameter] public EventCallback<bool> OnClose { get; set; }
+    [Parameter] public EventCallback<Device> OnSave { get; set; }
+
+    private async Task SaveDevice()
+    {
+        DeviceService.AddDevice(newDevice);
+        newDevice = new Device();
+        await OnClose.InvokeAsync(true);
+    }
+    private async Task closeModal()
+    {
+        
+        await OnClose.InvokeAsync(true);
+    }
+}

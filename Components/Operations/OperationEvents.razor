@@ -1,0 +1,31 @@
+﻿@using Jendamark.Assignment.Models
+
+
+<div class="row justify-content-start">
+    <div class="col-4">
+        <Button Color="Color.Primary" Clicked="@AddOperation">Add Operation</Button>
+    </div>
+    <div class="col-4">
+        <Button Color="Color.Primary" Clicked="@AddDevice">Add Device</Button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public EventCallback<int> ShowModal { get; set; }
+
+
+
+   
+
+    private async Task AddOperation()
+    {
+        await ShowModal.InvokeAsync(1);
+
+    }
+    private async Task AddDevice()
+    {
+        await ShowModal.InvokeAsync(2);
+    }
+   
+
+}

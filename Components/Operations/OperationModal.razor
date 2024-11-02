@@ -1,0 +1,60 @@
+﻿@using Jendamark.Assignment.Models
+@using Jendamark.Assignment.Services.Interfaces
+
+@inject IOperationService OperationService
+
+<ModalContent Centered="true">
+        <ModalHeader>
+            <ModalTitle>Add Operation</ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            <Field>
+                <FieldLabel>Name</FieldLabel>
+            <input type="text" class="form-control" @bind-value="newOperation.Name" placeholder="Enter Name..." />
+            </Field>
+            <Field>
+                <FieldLabel>Device</FieldLabel>
+            <select class="form-control" @bind="newOperation.Device">
+                @foreach (var device in DeviceList)
+                    {
+                        <option value="@device.DeviceID">@device.Name</option>
+                    }
+                </select>
+            </Field>
+            <Field>
+                <FieldLabel>Order</FieldLabel>
+            <input type="number" class="form-control" @bind="newOperation.Order" placeholder="Select order..." />
+            </Field>
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="@closeModal">Close</Button>
+            <Button Color="Color.Primary" Clicked="@SaveOperation">Save Changes</Button>
+        </ModalFooter>
+    </ModalContent>
+<style>
+    .show{
+        display:flex !important;
+    }
+</style>
+@code {
+    // reference to the modal component
+    private Modal operationModalRef;
+    [Parameter] public EventCallback<bool> OnClose { get; set; }
+    [Parameter] public EventCallback<bool> OnSave { get; set; }
+    [Parameter]
+    public List<Device> DeviceList { get; set; }
+    private Operation newOperation = new Operation();
+
+    private async Task SaveOperation()
+    {
+        OperationService.AddOperation(newOperation);
+        newOperation = new Operation();
+        await OnClose.InvokeAsync(true);
+    }
+    private async Task closeModal()
+    {
+        await OnClose.InvokeAsync(true);
+    }
+
+}

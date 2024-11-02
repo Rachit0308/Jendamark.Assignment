@@ -1,0 +1,82 @@
+﻿@page "/"
+@using Jendamark.Assignment.Components.Operations
+@using Jendamark.Assignment.Components.Device
+@using Jendamark.Assignment.Models
+@using Jendamark.Assignment.Services.Interfaces
+@inject IOperationService OperationService
+@inject IDeviceService DeviceService
+
+<h1>Assembly Line Process</h1>
+
+@* <DeviceModal /> *@
+<Tabs SelectedTab="@selectedTab" SelectedTabChanged="@OnSelectedTabChanged">
+    <Items>
+        <Tab Name="operation">Operation Management</Tab>
+        <Tab Name="device">Device Management</Tab>
+    </Items>
+    <Content>
+        <TabPanel Name="operation">
+            <OperationEvents ShowModal="OpenModal" />
+            <OperationList Operations="OperationService.GetOperations()"/>
+        </TabPanel>
+        <TabPanel Name="device">
+            <OperationEvents ShowModal="OpenModal" />
+        </TabPanel>
+    </Content>
+</Tabs>
+
+<Modal @ref="_operationModalRef">
+    <OperationModal OnClose="CloseAllModal" DeviceList="DeviceService.GetDevices()" />
+</Modal>
+<Modal @ref="_deviceModalRef">
+    <DeviceModal OnClose="CloseAllModal" OnSave="AddDevice" />
+</Modal>
+<style>
+    .show {
+        display: flex !important;
+    }
+
+    .modal {
+        display: none; /* Use flexbox for alignment */
+        justify-content: center; /* Center horizontally */
+        align-items: center; /* Center vertically */
+        position: fixed; /* Fixed position for centering */
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1060; /* Ensure it's above other elements */
+        overflow: hidden; /* Prevent scrolling when modal is open */
+    }
+</style>
+@code{
+    private List<Device> ListDevices = new List<Device>();
+    private List<Operation> ListOperations = new List<Operation>();
+    private Modal _deviceModalRef;
+    private Modal _operationModalRef;
+
+    string selectedTab = "operation";
+
+    private Task OnSelectedTabChanged(string name)
+    {
+        selectedTab = name;
+
+        return Task.CompletedTask;
+    }
+
+    private async Task CloseAllModal()
+    {
+        await _operationModalRef.Hide();
+        await _deviceModalRef.Hide();
+    }
+    private async Task OpenModal(int i)
+    {
+        if (i == 1) await _operationModalRef.Show();
+        else if (i == 2) await _deviceModalRef.Show();
+    }
+    private async Task AddDevice(Device device)
+    {
+        DeviceService.AddDevice(device);
+        await CloseAllModal();
+    }
+}

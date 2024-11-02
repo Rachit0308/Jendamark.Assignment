@@ -1,0 +1,54 @@
+﻿@using Jendamark.Assignment.Models
+@using Jendamark.Assignment.Services.Interfaces
+@inject IOperationService OperationService
+
+<div class="row">
+    <Table>
+        <TableHeader ThemeContrast="ThemeContrast.Dark">
+            <TableRow>
+                <TableHeaderCell>#</TableHeaderCell>
+                <TableHeaderCell>Operation Name</TableHeaderCell>
+                <TableHeaderCell>Device Type</TableHeaderCell>
+                <TableHeaderCell>Order</TableHeaderCell>
+                <TableHeaderCell>Actions</TableHeaderCell>
+            </TableRow>
+        </TableHeader>
+        <TableBody>
+            <TableRow>
+                @{
+                    int count = 1;
+                    foreach (var operation in Operations)
+                    {
+                        <TableRowHeader>@count</TableRowHeader>
+                        <TableRowCell>@operation.Name</TableRowCell>
+                        <TableRowCell>@operation.Device</TableRowCell>
+                        <TableRowCell>@operation.Order</TableRowCell>
+                        <TableRowCell>
+                            <!-- Edit Icon -->
+                            <button class="btn btn-link" >
+                                <i class="fas fa-edit"></i>
+                            </button>
+
+                            <!-- Delete Icon -->
+                            <button class="btn btn-link text-danger">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </TableRowCell>
+                        count++;
+                    }
+                }
+                
+               
+               
+            </TableRow>
+
+        </TableBody>
+    </Table>
+</div>
+
+
+@code {
+    [Parameter]
+    public List<Operation> Operations{ get; set; }
+    private void RemoveOperation(int operationId) => OperationService.RemoveOperation(operationId);
+}
