@@ -17,5 +17,11 @@ namespace Jendamark.Assignment.Services
             if (index >= 0)
                 devices[index] = device;
         }
+        public void RemoveDevice(int deviceId) =>
+         devices.RemoveAll(d => d.DeviceID == deviceId);
+
+        public Device GetDeviceById(int deviceId) => devices.Where(a => a.DeviceID == deviceId).FirstOrDefault();
+
+       
     }
 }

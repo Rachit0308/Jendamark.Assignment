@@ -8,40 +8,40 @@
             <TableRow>
                 <TableHeaderCell>#</TableHeaderCell>
                 <TableHeaderCell>Operation Name</TableHeaderCell>
+                <TableHeaderCell>Device Name</TableHeaderCell>
                 <TableHeaderCell>Device Type</TableHeaderCell>
                 <TableHeaderCell>Order</TableHeaderCell>
                 <TableHeaderCell>Actions</TableHeaderCell>
             </TableRow>
         </TableHeader>
         <TableBody>
-            <TableRow>
-                @{
+              @{
                     int count = 1;
                     foreach (var operation in Operations)
                     {
-                        <TableRowHeader>@count</TableRowHeader>
+            <TableRow>
+                        <TableRowHeader>@operation.OperationID</TableRowHeader>
                         <TableRowCell>@operation.Name</TableRowCell>
-                        <TableRowCell>@operation.Device</TableRowCell>
+                        <TableRowCell>@operation.Device?.Name</TableRowCell>
+                        <TableRowCell>@operation.Device?.DeviceType</TableRowCell>
                         <TableRowCell>@operation.Order</TableRowCell>
                         <TableRowCell>
                             <!-- Edit Icon -->
-                            <button class="btn btn-link" >
+                            <button class="btn btn-link" @onclick="()=> EditOperation(operation.OperationID)">
                                 <i class="fas fa-edit"></i>
                             </button>
 
                             <!-- Delete Icon -->
-                            <button class="btn btn-link text-danger">
+                            <button class="btn btn-link text-danger" @onclick="()=> OperationService.RemoveOperation(operation.OperationID)">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </TableRowCell>
-                        count++;
-                    }
-                }
-                
-               
-               
+                       
+                  
             </TableRow>
-
+                    count++;
+                }
+            }
         </TableBody>
     </Table>
 </div>
@@ -50,5 +50,11 @@
 @code {
     [Parameter]
     public List<Operation> Operations{ get; set; }
-    private void RemoveOperation(int operationId) => OperationService.RemoveOperation(operationId);
+    [Parameter] public EventCallback<Operation> ShowEditModal { get; set; }
+
+    public async Task EditOperation(int operationId)
+    {
+        var operation = OperationService.GetOperationById(operationId);
+        await ShowEditModal.InvokeAsync(operation);
+    }
 }

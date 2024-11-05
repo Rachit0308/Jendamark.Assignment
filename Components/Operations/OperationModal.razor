@@ -15,7 +15,8 @@
             </Field>
             <Field>
                 <FieldLabel>Device</FieldLabel>
-            <select class="form-control" @bind="newOperation.Device">
+            <select class="form-control"  @onchange="OnDeviceSelected">
+                <option value="0">-- Select Device --</option>
                 @foreach (var device in DeviceList)
                     {
                         <option value="@device.DeviceID">@device.Name</option>
@@ -29,7 +30,15 @@
         </ModalBody>
         <ModalFooter>
             <Button Color="Color.Secondary" Clicked="@closeModal">Close</Button>
+        @if (_selectedOperation.OperationID != 0)
+        {
+            <Button Color="Color.Primary" Clicked="@UpdateOperation">Update Changes</Button>
+        }
+        else
+        {
             <Button Color="Color.Primary" Clicked="@SaveOperation">Save Changes</Button>
+        }
+       
         </ModalFooter>
     </ModalContent>
 <style>
@@ -44,11 +53,44 @@
     [Parameter] public EventCallback<bool> OnSave { get; set; }
     [Parameter]
     public List<Device> DeviceList { get; set; }
+    private Operation _selectedOperation;
     private Operation newOperation = new Operation();
+    [Parameter]
+    public Operation SelectedOperation
+    {
+        get => _selectedOperation;
+        set
+        {
+            _selectedOperation = value;
+            if (_selectedOperation != null)
+            {
+                // Copy the values from SelectedOperation to newOperation
+                newOperation = _selectedOperation;
+            }
+        }
+    }
+   
+    private string selectedDeviceID="0";
+    private int operationIdCounter = 1;
+
+    private void OnDeviceSelected(ChangeEventArgs e)
+    {
+        // Parse the selected DeviceID and find the corresponding Device object
+        selectedDeviceID = e.Value.ToString();
+        newOperation.Device = DeviceList.FirstOrDefault(d => d.DeviceID == Convert.ToInt16(selectedDeviceID));
+    }
 
     private async Task SaveOperation()
     {
+        newOperation.OperationID = operationIdCounter;
         OperationService.AddOperation(newOperation);
+        operationIdCounter++;
+        newOperation = new Operation();
+        await OnClose.InvokeAsync(true);
+    }
+    private async Task UpdateOperation()
+    {
+        OperationService.UpdateOperation(newOperation);
         newOperation = new Operation();
         await OnClose.InvokeAsync(true);
     }

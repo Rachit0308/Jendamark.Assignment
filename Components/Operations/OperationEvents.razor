@@ -11,7 +11,8 @@
 </div>
 
 @code {
-    [Parameter] public EventCallback<int> ShowModal { get; set; }
+    [Parameter] public EventCallback<Operation> ShowOpModal { get; set; }
+    [Parameter] public EventCallback<Device> ShowDeviceModal { get; set; }
 
 
 
@@ -19,12 +20,12 @@
 
     private async Task AddOperation()
     {
-        await ShowModal.InvokeAsync(1);
+        await ShowOpModal.InvokeAsync();
 
     }
     private async Task AddDevice()
     {
-        await ShowModal.InvokeAsync(2);
+        await ShowDeviceModal.InvokeAsync();
     }
    
 

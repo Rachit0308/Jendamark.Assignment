@@ -39,17 +39,24 @@
         {
             <div>
                 <FieldLabel>Validation Code:</FieldLabel>
-                <TextEdit @bind-Value="newDevice.ValidationCode" />
+                <input type="text" class="form-control" @bind-value="newDevice.ValidationCode" placeholder="Enter Code..." />
             </div>
             <div>
                 <FieldLabel>Outcome Status:</FieldLabel>
-                <TextEdit @bind-Value="newDevice.OutcomeStatus" />
+                <input type="text" class="form-control" @bind-value="newDevice.OutcomeStatus" placeholder="Enter Outcome..." />
             </div>
         }
     </ModalBody>
     <ModalFooter>
         <Button Color="Color.Secondary" Clicked="@closeModal">Close</Button>
-        <Button Color="Color.Primary" Clicked="@SaveDevice">Save Changes</Button>
+        @if (_selectedDevice.DeviceID != 0)
+        {
+            <Button Color="Color.Primary" Clicked="@UpdateDevice">Update Changes</Button>
+        }
+        else
+        {
+            <Button Color="Color.Primary" Clicked="@SaveDevice">Save Changes</Button>
+        }
     </ModalFooter>
 </ModalContent>
 
@@ -61,6 +68,22 @@
         get => newDevice.SafetyCheckRequired ?? false;
         set => newDevice.SafetyCheckRequired = value;
     }
+    private Device _selectedDevice;
+    [Parameter]
+    public Device SelectedDevice
+    {
+        get => _selectedDevice;
+        set
+        {
+            _selectedDevice = value;
+            if (_selectedDevice != null)
+            {
+                // Copy the values from SelectedOperation to newOperation
+                newDevice = _selectedDevice;
+            }
+        }
+    }
+    private int deviceIdCounter = 1;
     private void HandleValidSubmit()
     {
         DeviceService.AddDevice(newDevice);
@@ -71,7 +94,15 @@
 
     private async Task SaveDevice()
     {
+        newDevice.DeviceID = deviceIdCounter;
         DeviceService.AddDevice(newDevice);
+        deviceIdCounter++;
+        newDevice = new Device();
+        await OnClose.InvokeAsync(true);
+    }
+    private async Task UpdateDevice()
+    {
+        DeviceService.UpdateDevice(newDevice);
         newDevice = new Device();
         await OnClose.InvokeAsync(true);
     }

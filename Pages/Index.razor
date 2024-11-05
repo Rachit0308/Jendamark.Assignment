@@ -16,20 +16,31 @@
     </Items>
     <Content>
         <TabPanel Name="operation">
-            <OperationEvents ShowModal="OpenModal" />
-            <OperationList Operations="OperationService.GetOperations()"/>
+            @* <OperationEvents ShowOpModal="OpenOpModal" ShowDeviceModal="OpenDeviceModal" /> *@
+            <div class="row justify-content-start">
+                <div class="col-4">
+                    <Button Color="Color.Primary" Clicked="()=>OpenOpModal(null)">Add Operation</Button>
+                </div>
+            </div>
+            <OperationList Operations="OperationService.GetOperations()" ShowEditModal="OpenOpModal" />
         </TabPanel>
         <TabPanel Name="device">
-            <OperationEvents ShowModal="OpenModal" />
+            <div class="row justify-content-start">
+                <div class="col-4">
+                    <Button Color="Color.Primary" Clicked="()=>OpenDeviceModal(null)">Add Device</Button>
+                </div>
+            </div>
+            <DeviceList Devices="DeviceService.GetDevices()" ShowEditModal="OpenDeviceModal" />
+            @* <OperationEvents ShowDeviceModal="OpenDeviceModal" /> *@
         </TabPanel>
     </Content>
 </Tabs>
 
 <Modal @ref="_operationModalRef">
-    <OperationModal OnClose="CloseAllModal" DeviceList="DeviceService.GetDevices()" />
+    <OperationModal OnClose="CloseAllModal" DeviceList="DeviceService.GetDevices()" SelectedOperation="selectedOperation" />
 </Modal>
 <Modal @ref="_deviceModalRef">
-    <DeviceModal OnClose="CloseAllModal" OnSave="AddDevice" />
+    <DeviceModal OnClose="CloseAllModal" OnSave="AddDevice" SelectedDevice="selectedDevice" />
 </Modal>
 <style>
     .show {
@@ -54,7 +65,8 @@
     private List<Operation> ListOperations = new List<Operation>();
     private Modal _deviceModalRef;
     private Modal _operationModalRef;
-
+    private Operation selectedOperation = new Operation();
+    private Device selectedDevice = new Device();
     string selectedTab = "operation";
 
     private Task OnSelectedTabChanged(string name)
@@ -69,10 +81,18 @@
         await _operationModalRef.Hide();
         await _deviceModalRef.Hide();
     }
-    private async Task OpenModal(int i)
+    private async Task OpenOpModal(Operation operation)
     {
-        if (i == 1) await _operationModalRef.Show();
-        else if (i == 2) await _deviceModalRef.Show();
+        if (operation != null) selectedOperation = operation;
+        else selectedOperation = new Operation();
+        await _operationModalRef.Show();
+        
+    }
+    private async Task OpenDeviceModal(Device device)
+    {
+        if (device != null) selectedDevice = device;
+        else selectedDevice = new Device();
+        await _deviceModalRef.Show();
     }
     private async Task AddDevice(Device device)
     {
