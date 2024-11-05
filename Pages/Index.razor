@@ -8,30 +8,39 @@
 
 <h1>Assembly Line Process</h1>
 
-@* <DeviceModal /> *@
 <Tabs SelectedTab="@selectedTab" SelectedTabChanged="@OnSelectedTabChanged">
     <Items>
-        <Tab Name="operation">Operation Management</Tab>
         <Tab Name="device">Device Management</Tab>
+        <Tab Name="operation">Operation Management</Tab>
     </Items>
     <Content>
-        <TabPanel Name="operation">
-            @* <OperationEvents ShowOpModal="OpenOpModal" ShowDeviceModal="OpenDeviceModal" /> *@
-            <div class="row justify-content-start">
-                <div class="col-4">
-                    <Button Color="Color.Primary" Clicked="()=>OpenOpModal(null)">Add Operation</Button>
-                </div>
-            </div>
-            <OperationList Operations="OperationService.GetOperations()" ShowEditModal="OpenOpModal" />
-        </TabPanel>
         <TabPanel Name="device">
-            <div class="row justify-content-start">
-                <div class="col-4">
-                    <Button Color="Color.Primary" Clicked="()=>OpenDeviceModal(null)">Add Device</Button>
+            <div class="col-sm-12 my-2">
+                <div class="row justify-content-start my-2">
+                    <div class="col-4 mx-0">
+                        <Button Color="Color.Primary" Clicked="()=>OpenDeviceModal(null)">Add Device</Button>
+                    </div>
+                </div>
+                <div class="row my-2">
+                     <div class="col-12 mx-0">
+                    <DeviceList Devices="DeviceService.GetDevices()" ShowEditModal="OpenDeviceModal" />
+                    </div>
                 </div>
             </div>
-            <DeviceList Devices="DeviceService.GetDevices()" ShowEditModal="OpenDeviceModal" />
-            @* <OperationEvents ShowDeviceModal="OpenDeviceModal" /> *@
+        </TabPanel>
+        <TabPanel Name="operation">
+            <div class="col-sm-12 my-2">
+                <div class="row justify-content-start my-2">
+                    <div class="col-sm-4 mx-0">
+                        <Button Color="Color.Primary" Clicked="()=>OpenOpModal(null)">Add Operation</Button>
+                    </div>
+                </div>
+                <div class="row my-2">
+                     <div class="col-12 mx-0">
+                    <OperationList Operations="OperationService.GetOperations()" ShowEditModal="OpenOpModal" />
+                    </div>
+                </div>
+            </div>
         </TabPanel>
     </Content>
 </Tabs>
@@ -40,7 +49,7 @@
     <OperationModal OnClose="CloseAllModal" DeviceList="DeviceService.GetDevices()" SelectedOperation="selectedOperation" />
 </Modal>
 <Modal @ref="_deviceModalRef">
-    <DeviceModal OnClose="CloseAllModal" OnSave="AddDevice" SelectedDevice="selectedDevice" />
+    <DeviceModal OnClose="CloseAllModal" SelectedDevice="selectedDevice" />
 </Modal>
 <style>
     .show {
@@ -48,19 +57,22 @@
     }
 
     .modal {
-        display: none; /* Use flexbox for alignment */
-        justify-content: center; /* Center horizontally */
-        align-items: center; /* Center vertically */
-        position: fixed; /* Fixed position for centering */
+        display: none; 
+        justify-content: center; 
+        align-items: center; 
+        position: fixed; 
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        z-index: 1060; /* Ensure it's above other elements */
-        overflow: hidden; /* Prevent scrolling when modal is open */
+        z-index: 1060; 
+        overflow: hidden; 
+    }
+    .modal-content{
+        width:500px !important;
     }
 </style>
-@code{
+@code {
     private List<Device> ListDevices = new List<Device>();
     private List<Operation> ListOperations = new List<Operation>();
     private Modal _deviceModalRef;
@@ -86,7 +98,7 @@
         if (operation != null) selectedOperation = operation;
         else selectedOperation = new Operation();
         await _operationModalRef.Show();
-        
+
     }
     private async Task OpenDeviceModal(Device device)
     {
@@ -94,9 +106,5 @@
         else selectedDevice = new Device();
         await _deviceModalRef.Show();
     }
-    private async Task AddDevice(Device device)
-    {
-        DeviceService.AddDevice(device);
-        await CloseAllModal();
-    }
+
 }
