@@ -1,51 +1,77 @@
 ﻿@using Jendamark.Assignment.Models
 @using Jendamark.Assignment.Services.Interfaces
+@using System.ComponentModel.DataAnnotations
 @inject IDeviceService DeviceService
 
 <ModalContent Centered="true">
     <ModalHeader>
-        <ModalTitle>Add Device</ModalTitle>
+        <ModalTitle>@(_selectedDevice?.DeviceID != 0 ? "Edit Device" : "Add Device")</ModalTitle>
         <CloseButton />
     </ModalHeader>
     <ModalBody>
-        <Field>
-            <FieldLabel>Name</FieldLabel>
-            <input type="text" class="form-control" @bind-value="newDevice.Name" placeholder="Enter Name..." />
-        </Field>
-        <Field>
-            <FieldLabel>Device Type</FieldLabel>
-            <select class="form-control" @bind="newDevice.DeviceType">
-                @foreach (DeviceType type in Enum.GetValues(typeof(DeviceType)))
+        <Validations @ref="validations" Mode="ValidationMode.Auto" Model="@newDevice" ValidateOnLoad="false">
+            <Field>
+                <FieldLabel>Device Type</FieldLabel>
+                <select class="form-control" @bind="newDevice.DeviceType">
+                    @foreach (DeviceType type in Enum.GetValues(typeof(DeviceType)))
+                    {
+                        <option value="@type" selected="@((type == newDevice?.DeviceType) ? "selected" : null)">@type</option>
+                    }
+                </select>
+                @if (showDeviceError)
                 {
-                    <option value="@type">@type</option>
+                    <div class="invalid-feedback" style="display:block !important"> Device type is required </div>
                 }
-            </select>
-        </Field>
-        @* Conditional Fields for LaserCutter *@
-        @if (newDevice.DeviceType == DeviceType.LaserCutter)
-        {
-            <div>
-                <FieldLabel> Laser Intensity:</FieldLabel>
-                <input type="number" class="form-control" @bind-value="newDevice.LaserIntensity" placeholder="Enter Intensity..." />
-            </div>
-            <div>
-                <FieldLabel>Safety Check Required:</FieldLabel>
-                @* <InputCheckbox @bind-Value="SafetyCheckRequiredWrapper" /> *@
-                <Check TValue="bool" @bind-Checked="@SafetyCheckRequiredWrapper" />
-            </div>
-        }
-        @* Conditional Fields for QualityAssuranceScanner *@
-        @if (newDevice.DeviceType == DeviceType.QualityAssuranceScanner)
-        {
-            <div>
-                <FieldLabel>Validation Code:</FieldLabel>
-                <input type="text" class="form-control" @bind-value="newDevice.ValidationCode" placeholder="Enter Code..." />
-            </div>
-            <div>
-                <FieldLabel>Outcome Status:</FieldLabel>
-                <input type="text" class="form-control" @bind-value="newDevice.OutcomeStatus" placeholder="Enter Outcome..." />
-            </div>
-        }
+            </Field>
+            <Field>
+                <FieldLabel>Name</FieldLabel>
+                <Validation>
+                    <TextEdit Placeholder="Enter name" @bind-Text="@newDevice.Name">
+                        <Feedback>
+                            <ValidationError />
+                        </Feedback>
+                    </TextEdit>
+                </Validation>
+            </Field>
+
+            @* Conditional Fields for LaserCutter *@
+            @if (newDevice.DeviceType == DeviceType.LaserCutter)
+            {
+                <div>
+                    <FieldLabel> Laser Intensity:</FieldLabel>
+                    <input type="number" class="form-control" @bind-value="newDevice.LaserIntensity" placeholder="Enter Intensity..." />
+
+                </div>
+                <div>
+                    <FieldLabel>Safety Check Required:</FieldLabel>
+                    <Check TValue="bool" @bind-Checked="@SafetyCheckRequiredWrapper" />
+                </div>
+            }
+            @* Conditional Fields for QualityAssuranceScanner *@
+            @if (newDevice.DeviceType == DeviceType.QualityAssuranceScanner)
+            {
+                <div>
+                    <FieldLabel>Validation Code:</FieldLabel>
+                    <Validation>
+                        <TextEdit Placeholder="Enter Code" @bind-Text="@newDevice.ValidationCode">
+                            <Feedback>
+                                <ValidationError />
+                            </Feedback>
+                        </TextEdit>
+                    </Validation>
+                </div>
+                <div>
+                    <FieldLabel>Outcome Status:</FieldLabel>
+                    <Validation>
+                        <TextEdit Placeholder="Enter Outcome" @bind-Text="@newDevice.OutcomeStatus">
+                            <Feedback>
+                                <ValidationError />
+                            </Feedback>
+                        </TextEdit>
+                    </Validation>
+                </div>
+            }
+        </Validations>
     </ModalBody>
     <ModalFooter>
         <Button Color="Color.Secondary" Clicked="@closeModal">Close</Button>
@@ -62,6 +88,7 @@
 
 @code {
     private Device newDevice = new Device();
+    private string selectedDeviceType = "";
     private string name { get; set; } = "";
     private bool SafetyCheckRequiredWrapper
     {
@@ -69,6 +96,7 @@
         set => newDevice.SafetyCheckRequired = value;
     }
     private Device _selectedDevice;
+    //Params
     [Parameter]
     public Device SelectedDevice
     {
@@ -80,25 +108,34 @@
             {
                 // Copy the values from SelectedOperation to newOperation
                 newDevice = _selectedDevice;
+                selectedDeviceType = _selectedDevice.DeviceType.ToString();
             }
         }
     }
-    private int deviceIdCounter = 1;
-    private void HandleValidSubmit()
-    {
-        DeviceService.AddDevice(newDevice);
-        newDevice = new Device(); // Reset for new entry
-    }
+
     [Parameter] public EventCallback<bool> OnClose { get; set; }
-    [Parameter] public EventCallback<Device> OnSave { get; set; }
+
+    private int deviceIdCounter = 1;
+
+    private bool showDeviceError = false;
+
+    Validations validations = new Validations();
 
     private async Task SaveDevice()
     {
-        newDevice.DeviceID = deviceIdCounter;
-        DeviceService.AddDevice(newDevice);
-        deviceIdCounter++;
-        newDevice = new Device();
-        await OnClose.InvokeAsync(true);
+        if (await validations.ValidateAll())
+        {
+            if (selectedDeviceType == "")
+            {
+                showDeviceError = true;
+                return;
+            }
+            newDevice.DeviceID = deviceIdCounter;
+            DeviceService.AddDevice(newDevice);
+            deviceIdCounter++;
+            newDevice = new Device();
+            await OnClose.InvokeAsync(true);
+        }
     }
     private async Task UpdateDevice()
     {
@@ -108,7 +145,30 @@
     }
     private async Task closeModal()
     {
-        
         await OnClose.InvokeAsync(true);
+    }
+    private void OnDeviceTypeChanged(ChangeEventArgs e)
+    {
+        var currentObj = newDevice;
+        if (e.Value.ToString() != "")
+        {
+            // Reset newDevice or clear specific properties as required
+            newDevice = new Device
+                {
+                    DeviceType = (DeviceType)Enum.Parse(typeof(DeviceType), e.Value.ToString()),
+                    Name = currentObj.Name,
+                    DeviceID = currentObj.DeviceID
+                };
+            selectedDeviceType = newDevice.DeviceType.ToString();
+            showDeviceError = false;
+        }
+        else
+        {
+            selectedDeviceType = e.Value.ToString();
+        }
+
+
+        // Optionally trigger any additional UI updates
+        StateHasChanged();
     }
 }

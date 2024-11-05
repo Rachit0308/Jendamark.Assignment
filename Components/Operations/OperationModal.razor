@@ -3,33 +3,51 @@
 
 @inject IOperationService OperationService
 
-<ModalContent Centered="true">
-        <ModalHeader>
-            <ModalTitle>Add Operation</ModalTitle>
-            <CloseButton />
-        </ModalHeader>
-        <ModalBody>
+<ModalContent Centered="true" Size="ModalSize.Large">
+    <Alert @ref="myAlert" Color="Color.Danger">
+        <AlertMessage>
+            @msgAlert
+        </AlertMessage>
+    </Alert>
+    <ModalHeader>
+        <ModalTitle>@(_selectedOperation?.OperationID != 0 ? "Edit Operation" : "Add Operation")</ModalTitle>
+        <CloseButton />
+    </ModalHeader>
+    <ModalBody>
+        <Validations @ref="validations" Mode="ValidationMode.Auto" Model="@newOperation" ValidateOnLoad="false">
             <Field>
                 <FieldLabel>Name</FieldLabel>
-            <input type="text" class="form-control" @bind-value="newOperation.Name" placeholder="Enter Name..." />
+                <Validation>
+                    <TextEdit Placeholder="Enter name" @bind-Text="@newOperation.Name">
+                        <Feedback>
+                            <ValidationError />
+                        </Feedback>
+                    </TextEdit>
+                </Validation>
             </Field>
             <Field>
                 <FieldLabel>Device</FieldLabel>
-            <select class="form-control"  @onchange="OnDeviceSelected">
-                <option value="0">-- Select Device --</option>
-                @foreach (var device in DeviceList)
+                <select class="form-control" @onchange="OnDeviceSelected">
+                    <option selected="@((selectedDeviceID == "0") ? "selected" : null)" value="0">-- Select Device --</option>
+                    @foreach (var device in DeviceList)
                     {
-                        <option value="@device.DeviceID">@device.Name</option>
+                        <option selected="@((device.DeviceID.ToString() == selectedDeviceID) ? "selected" : null)" value="@device.DeviceID">@device.Name</option>
                     }
                 </select>
+                @if (showDeviceError)
+                {
+                    <div class="invalid-feedback" style="display:block !important"> Device is required </div>
+                }
+
             </Field>
             <Field>
                 <FieldLabel>Order</FieldLabel>
-            <input type="number" class="form-control" @bind="newOperation.Order" placeholder="Select order..." />
+                <input type="number" class="form-control" @bind="newOperation.Order" placeholder="Select order..." />
             </Field>
-        </ModalBody>
-        <ModalFooter>
-            <Button Color="Color.Secondary" Clicked="@closeModal">Close</Button>
+        </Validations>
+    </ModalBody>
+    <ModalFooter>
+        <Button Color="Color.Secondary" Clicked="@closeModal">Close</Button>
         @if (_selectedOperation.OperationID != 0)
         {
             <Button Color="Color.Primary" Clicked="@UpdateOperation">Update Changes</Button>
@@ -38,23 +56,23 @@
         {
             <Button Color="Color.Primary" Clicked="@SaveOperation">Save Changes</Button>
         }
-       
-        </ModalFooter>
-    </ModalContent>
+
+    </ModalFooter>
+</ModalContent>
 <style>
-    .show{
-        display:flex !important;
+    .show {
+        display: flex !important;
     }
 </style>
 @code {
-    // reference to the modal component
-    private Modal operationModalRef;
-    [Parameter] public EventCallback<bool> OnClose { get; set; }
-    [Parameter] public EventCallback<bool> OnSave { get; set; }
-    [Parameter]
-    public List<Device> DeviceList { get; set; }
+    Alert myAlert;
     private Operation _selectedOperation;
     private Operation newOperation = new Operation();
+
+    //Params
+    [Parameter] public EventCallback<bool> OnClose { get; set; }
+    [Parameter]
+    public List<Device> DeviceList { get; set; }
     [Parameter]
     public Operation SelectedOperation
     {
@@ -69,9 +87,12 @@
             }
         }
     }
-   
-    private string selectedDeviceID="0";
+
+    private string selectedDeviceID = "0";
     private int operationIdCounter = 1;
+    Validations validations = new Validations();
+    private string msgAlert = "";
+    private bool showDeviceError = false;
 
     private void OnDeviceSelected(ChangeEventArgs e)
     {
@@ -82,11 +103,53 @@
 
     private async Task SaveOperation()
     {
-        newOperation.OperationID = operationIdCounter;
-        OperationService.AddOperation(newOperation);
-        operationIdCounter++;
-        newOperation = new Operation();
-        await OnClose.InvokeAsync(true);
+        showDeviceError = false;
+        if (await validations.ValidateAll())
+        {
+            var listOperations = OperationService.GetOperations();
+            var isOrderAlreadyExists = listOperations.Any(op => op.Order == newOperation.Order);
+            if (selectedDeviceID == "0")
+            {
+                showDeviceError = true;
+                return;
+            }
+            if (isOrderAlreadyExists)
+            {
+                msgAlert = "Operation already exists at this order.";
+                await myAlert.Show();
+                // Automatically hide the alert after 3 seconds
+                _ = Task.Delay(3000).ContinueWith(_ =>
+                 {
+                     myAlert.Hide();
+                     msgAlert = "";
+                 });
+                return;
+            }
+            if (newOperation.Device?.DeviceType == DeviceType.LaserCutter)
+            {
+                var isQualityAssuranceExists = listOperations.Any(op => op.Device.DeviceType == DeviceType.QualityAssuranceScanner);
+                if (!isQualityAssuranceExists)
+                {
+                    msgAlert = "Please add quality assurance operation first.";
+                    await myAlert.Show();
+                    // Automatically hide the alert after 3 seconds
+                    _ = Task.Delay(3000).ContinueWith(_ =>
+                    {
+                        myAlert.Hide();
+                        msgAlert = "";
+                    });
+                    return;
+                }
+
+            }
+
+            await myAlert.Hide();
+            newOperation.OperationID = operationIdCounter;
+            OperationService.AddOperation(newOperation);
+            operationIdCounter++;
+            newOperation = new Operation();
+            await OnClose.InvokeAsync(true);
+        }
     }
     private async Task UpdateOperation()
     {

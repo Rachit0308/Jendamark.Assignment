@@ -1,13 +1,29 @@
-﻿namespace Jendamark.Assignment.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Jendamark.Assignment.Models
 {
     public class Device
     {
         public int DeviceID { get; set; }
+
+        [Required(ErrorMessage = "Name is required")]
+        [StringLength(100, ErrorMessage = "Name cannot exceed 100 characters")]
         public string Name { get; set; }
+
+        [Required(ErrorMessage = "Device Type is required")]
         public DeviceType DeviceType { get; set; }
-        public int? LaserIntensity { get; set; } // Only for LaserCutter
-        public bool? SafetyCheckRequired { get; set; } // Only for LaserCutter
-        public string ValidationCode { get; set; } // Only for QualityAssuranceScanner
-        public string OutcomeStatus { get; set; } // Only for QualityAssuranceScanner
+
+        public int LaserIntensity { get; set; } 
+
+        public bool? SafetyCheckRequired { get; set; }
+
+        // For QualityAssuranceScanner-specific properties
+        [StringLength(50, ErrorMessage = "Validation Code cannot exceed 50 characters")]
+        [Required(ErrorMessage = "Validation Code is required")]
+        public string ValidationCode { get; set; }
+
+        [StringLength(50, ErrorMessage = "Outcome Status cannot exceed 50 characters")]
+        [Required(ErrorMessage = "Outcome Status is required")]
+        public string OutcomeStatus { get; set; }
     }
 }

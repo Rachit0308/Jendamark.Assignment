@@ -2,54 +2,50 @@
 @using Jendamark.Assignment.Services.Interfaces
 @inject IDeviceService DeviceService;
 
-<div class="row">
-    <Table>
-        <TableHeader ThemeContrast="ThemeContrast.Dark">
-            <TableRow>
-                <TableHeaderCell>#</TableHeaderCell>
-                <TableHeaderCell>Device Name</TableHeaderCell>
-                <TableHeaderCell>Device Type</TableHeaderCell>
-                <TableHeaderCell>Laser Intensity</TableHeaderCell>
-                <TableHeaderCell>Safety Check</TableHeaderCell>
-                <TableHeaderCell>Validation Code</TableHeaderCell>
-                <TableHeaderCell>Outcome Status</TableHeaderCell>
-                <TableHeaderCell>Actions</TableHeaderCell>
-            </TableRow>
-        </TableHeader>
-        <TableBody>
-            @{
-                int count = 0;
-                foreach (var device in Devices)
-                {
-                    count++;
-                    <TableRow>
-                        <TableRowHeader>@device.DeviceID</TableRowHeader>
-                        <TableRowCell>@device.Name</TableRowCell>
-                        <TableRowCell>@device.DeviceType</TableRowCell>
-                        <TableRowCell>@(device?.LaserIntensity == null ? "NA" : device.LaserIntensity.ToString())</TableRowCell>
-                        <TableRowCell> @(device?.SafetyCheckRequired == null ? "NA" : device.SafetyCheckRequired == true ? "Required" : "Not Required")</TableRowCell>
-                        <TableRowCell> @(device?.ValidationCode == null ? "NA" : device.ValidationCode.ToString())</TableRowCell>
-                        <TableRowCell>@(device?.OutcomeStatus == null ? "NA" : device.OutcomeStatus.ToString())</TableRowCell>
-                        <TableRowCell>
-                            <!-- Edit Icon -->
-                            <button class="btn btn-link" @onclick="()=> EditDevice(device.DeviceID)">
-                                <i class="fas fa-edit"></i>
-                            </button>
+<Table>
+    <TableHeader ThemeContrast="ThemeContrast.Dark">
+        <TableRow>
+            <TableHeaderCell>#</TableHeaderCell>
+            <TableHeaderCell>Device Name</TableHeaderCell>
+            <TableHeaderCell>Device Type</TableHeaderCell>
+            <TableHeaderCell>Laser Intensity</TableHeaderCell>
+            <TableHeaderCell>Safety Check</TableHeaderCell>
+            <TableHeaderCell>Validation Code</TableHeaderCell>
+            <TableHeaderCell>Outcome Status</TableHeaderCell>
+            <TableHeaderCell>Actions</TableHeaderCell>
+        </TableRow>
+    </TableHeader>
+    <TableBody>
+        @{
+            foreach (var device in Devices)
+            {
+                <TableRow>
+                    <TableRowHeader>@device.DeviceID</TableRowHeader>
+                    <TableRowCell>@device.Name</TableRowCell>
+                    <TableRowCell>@device.DeviceType</TableRowCell>
+                    <TableRowCell>@(device.DeviceType != DeviceType.LaserCutter ? "NA" : device.LaserIntensity.ToString())</TableRowCell>
+                    <TableRowCell> @(device.DeviceType != DeviceType.LaserCutter ? "NA" : device.SafetyCheckRequired == true ? "Required" : "Not Required")</TableRowCell>
+                    <TableRowCell> @(device.DeviceType != DeviceType.QualityAssuranceScanner ? "NA" : device.ValidationCode.ToString())</TableRowCell>
+                    <TableRowCell>@(device.DeviceType != DeviceType.QualityAssuranceScanner ? "NA" : device.OutcomeStatus.ToString())</TableRowCell>
+                    <TableRowCell>
+                        <!-- Edit Icon -->
+                        <button class="btn btn-link" @onclick="()=> EditDevice(device.DeviceID)">
+                            <i class="fas fa-edit"></i>
+                        </button>
 
-                            <!-- Delete Icon -->
-                            <button class="btn btn-link text-danger" @onclick="()=> DeviceService.RemoveDevice(device.DeviceID)">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </TableRowCell>
+                        <!-- Delete Icon -->
+                        <button class="btn btn-link text-danger" @onclick="()=> DeviceService.RemoveDevice(device.DeviceID)">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </TableRowCell>
 
 
-                    </TableRow>
-                   
-                }
+                </TableRow>
+
             }
-        </TableBody>
-    </Table>
-</div>
+        }
+    </TableBody>
+</Table>
 
 
 @code {
