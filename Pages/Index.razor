@@ -10,8 +10,8 @@
 
 <Tabs SelectedTab="@selectedTab" SelectedTabChanged="@OnSelectedTabChanged">
     <Items>
-        <Tab Name="device">Device Management</Tab>
-        <Tab Name="operation">Operation Management</Tab>
+        <Tab Name="device" Style="cursor:pointer">Device Management</Tab>
+        <Tab Name="operation" Style="cursor:pointer">Operation Management</Tab>
     </Items>
     <Content>
         <TabPanel Name="device">
@@ -37,7 +37,7 @@
                 </div>
                 <div class="row my-2">
                      <div class="col-12 mx-0">
-                    <OperationList Operations="OperationService.GetOperations()" ShowEditModal="OpenOpModal" />
+                    <OperationList Operations="OperationService.GetOperations().OrderBy(o=>o.Order).ToList()" ShowEditModal="OpenOpModal" />
                     </div>
                 </div>
             </div>
@@ -93,7 +93,7 @@
     {
         await _operationModalRef.Hide();
         await _deviceModalRef.Hide();
-       await  deviceLisComponentt.LoadAllDevices();
+        deviceLisComponentt.LoadAllDevices();
     }
     private async Task OpenOpModal(Operation operation)
     {

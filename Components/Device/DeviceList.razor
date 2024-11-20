@@ -2,13 +2,18 @@
 @using Jendamark.Assignment.Services.Interfaces
 @using Jendamark.Assignment.ViewModels
 @inject IDeviceService DeviceService;
+@inject IOperationService OperationService;
 
 @if (Devices?.Count > 0)
 {
+    <Alert @ref="myAlert" Color="Color.Danger">
+        <AlertMessage>
+            @msgAlert
+        </AlertMessage>
+    </Alert>
     <Table>
-        <TableHeader ThemeContrast="ThemeContrast.Dark">
+        <TableHeader Style="color:white; background-color:#05173d">
             <TableRow>
-                <TableHeaderCell>#</TableHeaderCell>
                 <TableHeaderCell>Device Name</TableHeaderCell>
                 <TableHeaderCell>Device Type</TableHeaderCell>
                 <TableHeaderCell>Laser Intensity</TableHeaderCell>
@@ -23,7 +28,6 @@
                 foreach (var device in FilteredDevices)
                 {
                     <TableRow>
-                        <TableRowHeader>@device.DeviceID</TableRowHeader>
                         <TableRowCell>@device.Name</TableRowCell>
                         <TableRowCell>@device.DeviceType</TableRowCell>
                         <TableRowCell>@device.LaserIntensityDisplay</TableRowCell>
@@ -37,7 +41,7 @@
                             </button>
 
                             <!-- Delete Icon -->
-                            <button class="btn btn-link text-danger" @onclick="()=> DeviceService.RemoveDevice(device.DeviceID)">
+                            <button class="btn btn-link text-danger" @onclick="()=>DeleteDevice(device.DeviceID)">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </TableRowCell>
@@ -50,7 +54,10 @@
         </TableBody>
     </Table>
 }
-
+else
+{
+            <span>No records found.</span>
+}
 
 
 @code {
@@ -59,19 +66,19 @@
     [Parameter] public EventCallback<Device> ShowEditModal { get; set; }
     private List<DeviceViewModel> FilteredDevices { get; set; }
     [Parameter] public EventCallback<Task> Refresh { get; set; }
-
-    protected override async Task OnInitializedAsync()
+    Alert myAlert;
+    private string msgAlert = "";
+    protected override void OnInitialized()
     {
-        await LoadAllDevices();
+         LoadAllDevices();
     }
-    public async Task LoadAllDevices()
+    public void LoadAllDevices()
     {
         Devices = DeviceService.GetDevices();
 
         // Project each device into the DeviceViewModel with conditional properties
         FilteredDevices = Devices.Select(device =>
         {
-            // Use type checking to handle specific device types
             if (device is LaserDevice laserCutterDevice)
             {
                 return new DeviceViewModel
@@ -120,5 +127,28 @@
     {
         var device = DeviceService.GetDeviceById(deviceId);
         await ShowEditModal.InvokeAsync(device);
+    }
+    public void DeleteDevice(int deviceId)
+    {
+        var operations = OperationService.GetOperations();
+        var isDeviceExistInOperations = operations.Any(a => a.Device.DeviceID == deviceId);
+        if (isDeviceExistInOperations)
+        {
+            msgAlert = "This device is using in operation.";
+            myAlert.Show();
+            _ = Task.Delay(3000).ContinueWith(_ =>
+             {
+                 myAlert.Hide();
+                 msgAlert = "";
+             });
+            return;
+        }
+        else
+        {
+            DeviceService.RemoveDevice(deviceId);
+             LoadAllDevices();
+            StateHasChanged();
+        }
+       
     }
 }

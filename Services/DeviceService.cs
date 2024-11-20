@@ -1,4 +1,5 @@
 ﻿using Jendamark.Assignment.Models;
+using Jendamark.Assignment.Repositories.Contracts;
 using Jendamark.Assignment.Services.Interfaces;
 
 namespace Jendamark.Assignment.Services
@@ -6,57 +7,25 @@ namespace Jendamark.Assignment.Services
     public class DeviceService : IDeviceService
     {
         private readonly List<Device> devices = new();
+        private readonly IDeviceRepository _deviceRepository;
+
+        public DeviceService(IDeviceRepository deviceRepository)
+        {
+            _deviceRepository = deviceRepository;
+            devices = _deviceRepository.GetAllDevices(); // Fetch devices from repository
+        }
 
         public List<Device> GetDevices() => devices;
 
         public void AddDevice(Device device)
         {
-            if (device is LaserDevice laserDevice)
-            {
-                AddLaserDevice(laserDevice);
-            }
-            else if (device is QualityAssuranceScannerDevice qaDevice)
-            {
-                AddQualityAssuranceScannerDevice(qaDevice);
-            }
-            else
-            {
-                devices.Add(device);
-            }
+            _deviceRepository.AddDevice(device);
         }
 
-        public void AddLaserDevice(LaserDevice laserDevice)
-        {
-            devices.Add(laserDevice);
-        }
-
-        public void AddQualityAssuranceScannerDevice(QualityAssuranceScannerDevice qaDevice)
-        {
-            devices.Add(qaDevice);
-        }
-
-        public void UpdateDevice(Device device)
-        {
-            var index = devices.FindIndex(d => d.DeviceID == device.DeviceID);
-            if (index >= 0)
-            {
-                if (device is LaserDevice laserDevice)
-                {
-                    devices[index] = laserDevice;
-                }
-                else if (device is QualityAssuranceScannerDevice qaDevice)
-                {
-                    devices[index] = qaDevice;
-                }
-                else
-                {
-                    devices[index] = device;
-                }
-            }
-        }
+        public void UpdateDevice(Device device) => _deviceRepository.UpdateDevice(device);
 
         public void RemoveDevice(int deviceId) =>
-            devices.RemoveAll(d => d.DeviceID == deviceId);
+            _deviceRepository.DeleteDevice(deviceId);
 
         public Device GetDeviceById(int deviceId) =>
             devices.FirstOrDefault(d => d.DeviceID == deviceId);

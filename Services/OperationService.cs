@@ -1,35 +1,27 @@
 ﻿using Jendamark.Assignment.Models;
+using Jendamark.Assignment.Repositories.Contracts;
 using Jendamark.Assignment.Services.Interfaces;
 
 namespace Jendamark.Assignment.Services
 {
     public class OperationService : IOperationService
     {
-        private readonly List<Operation> operations = new();
+        private readonly IOperationRepository _operationRepository;
 
-        public List<Operation> GetOperations() => operations;
-
-        public void AddOperation(Operation operation) => operations.Add(operation);
-
-        public void RemoveOperation(int operationId) =>
-            operations.RemoveAll(op => op.OperationID == operationId);
-
-        public Operation GetOperationById(int operationId) => operations.Where(a=>a.OperationID == operationId).FirstOrDefault();
-
-        public void UpdateOperation(Operation operation)
+        // Inject the repository into the service
+        public OperationService(IOperationRepository operationRepository)
         {
-            var existingOperation = operations.FirstOrDefault(o => o.OperationID == operation.OperationID);
-
-            if (existingOperation != null)
-            {
-                existingOperation.Name = operation.Name;
-                existingOperation.Device = operation.Device;
-                existingOperation.Order = operation.Order;
-            }
-            else
-            {
-                throw new ArgumentException("Operation not found.");
-            }
+            _operationRepository = operationRepository;
         }
+
+        public List<Operation> GetOperations() => _operationRepository.GetOperations();
+
+        public void AddOperation(Operation operation) => _operationRepository.AddOperation(operation);
+
+        public void RemoveOperation(int operationId) => _operationRepository.RemoveOperation(operationId);
+
+        public Operation GetOperationById(int operationId) => _operationRepository.GetOperationById(operationId);
+
+        public void UpdateOperation(Operation operation) => _operationRepository.UpdateOperation(operation);
     }
 }

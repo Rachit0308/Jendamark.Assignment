@@ -5,9 +5,8 @@
 @if (Operations?.Count > 0)
 {
     <Table>
-        <TableHeader ThemeContrast="ThemeContrast.Dark">
+        <TableHeader Style="color:white; background-color:#05173d">
             <TableRow>
-                <TableHeaderCell>#</TableHeaderCell>
                 <TableHeaderCell>Operation Name</TableHeaderCell>
                 <TableHeaderCell>Device Name</TableHeaderCell>
                 <TableHeaderCell>Device Type</TableHeaderCell>
@@ -21,7 +20,6 @@
                     foreach (var operation in Operations)
                     {
             <TableRow>
-                        <TableRowHeader>@operation.OperationID</TableRowHeader>
                         <TableRowCell>@operation.Name</TableRowCell>
                         <TableRowCell>@operation.Device?.Name</TableRowCell>
                         <TableRowCell>@operation.Device?.DeviceType</TableRowCell>
@@ -33,7 +31,7 @@
                             </button>
 
                             <!-- Delete Icon -->
-                            <button class="btn btn-link text-danger" @onclick="()=> OperationService.RemoveOperation(operation.OperationID)">
+                            <button class="btn btn-link text-danger" @onclick="()=>DeleteOperation(operation.OperationID) ">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </TableRowCell>
@@ -47,6 +45,10 @@
     </Table>
 
     }
+else
+{
+    <span>No records found.</span>
+}
 
 
 @code {
@@ -54,9 +56,22 @@
     public List<Operation> Operations{ get; set; }
     [Parameter] public EventCallback<Operation> ShowEditModal { get; set; }
 
+    protected override void OnInitialized()
+    {
+         LoadAllOperations();
+    }
+    public void LoadAllOperations()
+    {
+        Operations = OperationService.GetOperations().OrderBy(o => o.Order).ToList();
+    }
     public async Task EditOperation(int operationId)
     {
         var operation = OperationService.GetOperationById(operationId);
         await ShowEditModal.InvokeAsync(operation);
+    }
+    public void DeleteOperation(int deviceId)
+    {
+        OperationService.RemoveOperation(deviceId);
+        StateHasChanged();
     }
 }

@@ -1,4 +1,4 @@
-using Jendamark.Assignment.Data;
+
 using Jendamark.Assignment.Services.Interfaces;
 using Jendamark.Assignment.Services;
 using Microsoft.AspNetCore.Components;
@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Components.Web;
 using Blazorise;
 using Blazorise.Bootstrap5;
 using Blazorise.Icons.FontAwesome;
+using Jendamark.Assignment.Repositories.Contracts;
+using Jendamark.Assignment.Repositories.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,9 +23,10 @@ builder.Services
     .AddBootstrap5Providers()
     .AddFontAwesomeIcons();
 
-builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddTransient<IDeviceRepository, DeviceRepository>();
 builder.Services.AddScoped<IDeviceService, DeviceService>();
 builder.Services.AddScoped<IOperationService, OperationService>();
+builder.Services.AddTransient<IOperationRepository, OperationRepository>();
 
 var app = builder.Build();
 

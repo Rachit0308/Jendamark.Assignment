@@ -98,12 +98,6 @@
     {
         selectedDeviceID = newOperation.Device?.DeviceID ?? 0;
     }
-    // private void OnDeviceSelected(ChangeEventArgs e)
-    // {
-    //     // Parse the selected DeviceID and find the corresponding Device object
-    //     selectedDeviceID = e.Value.ToString();
-       
-    // }
 
     private async Task SaveOperation()
     {
@@ -122,7 +116,6 @@
             {
                 msgAlert = "Operation already exists at this order.";
                 await myAlert.Show();
-                // Automatically hide the alert after 3 seconds
                 _ = Task.Delay(3000).ContinueWith(_ =>
                  {
                      myAlert.Hide();
@@ -137,7 +130,6 @@
                 {
                     msgAlert = "Please add quality assurance operation first.";
                     await myAlert.Show();
-                    // Automatically hide the alert after 3 seconds
                     _ = Task.Delay(3000).ContinueWith(_ =>
                     {
                         myAlert.Hide();

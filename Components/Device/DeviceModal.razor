@@ -90,11 +90,6 @@
     private Device newDevice = new Device();
     private string selectedDeviceType = "";
     private string name { get; set; } = "";
-    // private bool SafetyCheckRequiredWrapper
-    // {
-    //     get => newDevice.SafetyCheckRequired ?? false;
-    //     set => newDevice.SafetyCheckRequired = value;
-    // }
     private Device _selectedDevice;
     //Params
     [Parameter]
@@ -121,22 +116,7 @@
 
     Validations validations = new Validations();
 
-    // private async Task SaveDevice()
-    // {
-    //     if (await validations.ValidateAll())
-    //     {
-    //         if (selectedDeviceType == "")
-    //         {
-    //             showDeviceError = true;
-    //             return;
-    //         }
-    //         newDevice.DeviceID = deviceIdCounter;
-    //         DeviceService.AddDevice(newDevice);
-    //         deviceIdCounter++;
-    //         newDevice = new Device();
-    //         await OnClose.InvokeAsync(true);
-    //     }
-    // }
+  
     private async Task UpdateDevice()
     {
         DeviceService.UpdateDevice(newDevice);
@@ -147,30 +127,7 @@
     {
         await OnClose.InvokeAsync(true);
     }
-    // private void OnDeviceTypeChanged(ChangeEventArgs e)
-    // {
-    //     var currentObj = newDevice;
-    //     if (e.Value.ToString() != "")
-    //     {
-    //         // Reset newDevice or clear specific properties as required
-    //         newDevice = new Device
-    //             {
-    //                 DeviceType = (DeviceType)Enum.Parse(typeof(DeviceType), e.Value.ToString()),
-    //                 Name = currentObj.Name,
-    //                 DeviceID = currentObj.DeviceID
-    //             };
-    //         selectedDeviceType = newDevice.DeviceType.ToString();
-    //         showDeviceError = false;
-    //     }
-    //     else
-    //     {
-    //         selectedDeviceType = e.Value.ToString();
-    //     }
-
-
-    //     // Optionally trigger any additional UI updates
-    //     StateHasChanged();
-    // }
+  
     private void OnDeviceTypeChanged(ChangeEventArgs e)
     {
         if (e.Value != null && Enum.TryParse(typeof(DeviceType), e.Value.ToString(), out var deviceTypeEnum))
@@ -180,8 +137,8 @@
             {
                 DeviceType.LaserCutter => new LaserDevice
                     {
-                        Name = newDevice.Name, // Preserve name
-                        DeviceID = newDevice.DeviceID // Preserve ID
+                        Name = newDevice.Name,
+                        DeviceID = newDevice.DeviceID 
                     },
                 DeviceType.QualityAssuranceScanner => new QualityAssuranceScannerDevice
                     {
@@ -210,19 +167,8 @@
             }
 
             newDevice.DeviceID = deviceIdCounter;
-
-            switch (newDevice)
-            {
-                case LaserDevice laserDevice:
-                    DeviceService.AddLaserDevice(laserDevice);
-                    break;
-                case QualityAssuranceScannerDevice qaDevice:
-                    DeviceService.AddQualityAssuranceScannerDevice(qaDevice);
-                    break;
-                default:
-                    DeviceService.AddDevice(newDevice);
-                    break;
-            }
+            DeviceService.AddDevice(newDevice);
+          
 
             deviceIdCounter++;
             newDevice = new Device(); // Reset

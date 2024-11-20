@@ -7,8 +7,6 @@ namespace Jendamark.Assignment.Services.Interfaces
     {
         List<Device> GetDevices();
         void AddDevice(Device device);
-        void AddLaserDevice(LaserDevice laserDevice);
-        void AddQualityAssuranceScannerDevice(QualityAssuranceScannerDevice qaDevice);
         void UpdateDevice(Device device);
         void RemoveDevice(int deviceId);
         Device GetDeviceById(int deviceId);
