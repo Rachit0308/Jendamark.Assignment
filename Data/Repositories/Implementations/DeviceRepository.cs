@@ -1,9 +1,9 @@
-﻿using Jendamark.Assignment.Models;
-using Jendamark.Assignment.Repositories.Contracts;
+﻿using Jendamark.Assignment.Data.Models;
+using Jendamark.Assignment.Data.Repositories.Interfaces;
 
-namespace Jendamark.Assignment.Repositories.Implementations
+namespace Jendamark.Assignment.Data.Repositories.Implementations
 {
-    public class DeviceRepository: IDeviceRepository
+    public class DeviceRepository : IDeviceRepository
     {
         private readonly List<Device> devices;
 
@@ -14,7 +14,8 @@ namespace Jendamark.Assignment.Repositories.Implementations
         }
 
         public List<Device> GetAllDevices() => devices;
-        public void AddDevice(Device device) {
+        public void AddDevice(Device device)
+        {
             devices.Add(device);
         }
         public void DeleteDevice(int deviceId) =>

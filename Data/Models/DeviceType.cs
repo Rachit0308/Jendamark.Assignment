@@ -1,4 +1,4 @@
-﻿namespace Jendamark.Assignment.Models
+﻿namespace Jendamark.Assignment.Data.Models
 {
     public enum DeviceType
     {

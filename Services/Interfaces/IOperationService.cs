@@ -1,4 +1,4 @@
-﻿using Jendamark.Assignment.Models;
+﻿using Jendamark.Assignment.Data.Models;
 
 namespace Jendamark.Assignment.Services.Interfaces
 {

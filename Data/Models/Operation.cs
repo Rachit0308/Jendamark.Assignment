@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Jendamark.Assignment.Models
+namespace Jendamark.Assignment.Data.Models
 {
     public class Operation
     {

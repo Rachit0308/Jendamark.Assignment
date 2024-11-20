@@ -1,10 +1,10 @@
-﻿using Jendamark.Assignment.Models;
-using Jendamark.Assignment.Repositories.Contracts;
+﻿using Jendamark.Assignment.Data.Models;
+using Jendamark.Assignment.Data.Repositories.Interfaces;
 using Jendamark.Assignment.Services.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Jendamark.Assignment.Repositories.Implementations
+namespace Jendamark.Assignment.Data.Repositories.Implementations
 {
     public class OperationRepository : IOperationRepository
     {

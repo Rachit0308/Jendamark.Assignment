@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Components.Web;
 using Blazorise;
 using Blazorise.Bootstrap5;
 using Blazorise.Icons.FontAwesome;
-using Jendamark.Assignment.Repositories.Contracts;
-using Jendamark.Assignment.Repositories.Implementations;
+using Jendamark.Assignment.Data.Repositories.Implementations;
+using Jendamark.Assignment.Data.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

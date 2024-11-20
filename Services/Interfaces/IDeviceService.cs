@@ -1,4 +1,4 @@
-﻿using Jendamark.Assignment.Models;
+﻿using Jendamark.Assignment.Data.Models;
 using System.Collections.Generic;
 
 namespace Jendamark.Assignment.Services.Interfaces

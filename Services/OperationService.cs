@@ -1,5 +1,5 @@
-﻿using Jendamark.Assignment.Models;
-using Jendamark.Assignment.Repositories.Contracts;
+﻿using Jendamark.Assignment.Data.Models;
+using Jendamark.Assignment.Data.Repositories.Interfaces;
 using Jendamark.Assignment.Services.Interfaces;
 
 namespace Jendamark.Assignment.Services

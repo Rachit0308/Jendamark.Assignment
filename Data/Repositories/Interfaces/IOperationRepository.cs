@@ -1,6 +1,6 @@
-﻿using Jendamark.Assignment.Models;
+﻿using Jendamark.Assignment.Data.Models;
 
-namespace Jendamark.Assignment.Repositories.Contracts
+namespace Jendamark.Assignment.Data.Repositories.Interfaces
 {
     public interface IOperationRepository
     {

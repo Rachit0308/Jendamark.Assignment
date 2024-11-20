@@ -1,4 +1,4 @@
-﻿@using Jendamark.Assignment.Models
+﻿@using Jendamark.Assignment.Data.Models
 @using Jendamark.Assignment.Services.Interfaces
 @inject IOperationService OperationService
 
@@ -58,7 +58,7 @@ else
 
     protected override void OnInitialized()
     {
-         LoadAllOperations();
+        LoadAllOperations();
     }
     public void LoadAllOperations()
     {
@@ -72,6 +72,7 @@ else
     public void DeleteOperation(int deviceId)
     {
         OperationService.RemoveOperation(deviceId);
+        LoadAllOperations();
         StateHasChanged();
     }
 }
