@@ -1,57 +1,120 @@
 ﻿@using Jendamark.Assignment.Models
 @using Jendamark.Assignment.Services.Interfaces
+@using Jendamark.Assignment.ViewModels
 @inject IDeviceService DeviceService;
 
-<Table>
-    <TableHeader ThemeContrast="ThemeContrast.Dark">
-        <TableRow>
-            <TableHeaderCell>#</TableHeaderCell>
-            <TableHeaderCell>Device Name</TableHeaderCell>
-            <TableHeaderCell>Device Type</TableHeaderCell>
-            <TableHeaderCell>Laser Intensity</TableHeaderCell>
-            <TableHeaderCell>Safety Check</TableHeaderCell>
-            <TableHeaderCell>Validation Code</TableHeaderCell>
-            <TableHeaderCell>Outcome Status</TableHeaderCell>
-            <TableHeaderCell>Actions</TableHeaderCell>
-        </TableRow>
-    </TableHeader>
-    <TableBody>
-        @{
-            foreach (var device in Devices)
-            {
-                <TableRow>
-                    <TableRowHeader>@device.DeviceID</TableRowHeader>
-                    <TableRowCell>@device.Name</TableRowCell>
-                    <TableRowCell>@device.DeviceType</TableRowCell>
-                    <TableRowCell>@(device.DeviceType != DeviceType.LaserCutter ? "NA" : device.LaserIntensity.ToString())</TableRowCell>
-                    <TableRowCell> @(device.DeviceType != DeviceType.LaserCutter ? "NA" : device.SafetyCheckRequired == true ? "Required" : "Not Required")</TableRowCell>
-                    <TableRowCell> @(device.DeviceType != DeviceType.QualityAssuranceScanner ? "NA" : device.ValidationCode.ToString())</TableRowCell>
-                    <TableRowCell>@(device.DeviceType != DeviceType.QualityAssuranceScanner ? "NA" : device.OutcomeStatus.ToString())</TableRowCell>
-                    <TableRowCell>
-                        <!-- Edit Icon -->
-                        <button class="btn btn-link" @onclick="()=> EditDevice(device.DeviceID)">
-                            <i class="fas fa-edit"></i>
-                        </button>
+@if (Devices?.Count > 0)
+{
+    <Table>
+        <TableHeader ThemeContrast="ThemeContrast.Dark">
+            <TableRow>
+                <TableHeaderCell>#</TableHeaderCell>
+                <TableHeaderCell>Device Name</TableHeaderCell>
+                <TableHeaderCell>Device Type</TableHeaderCell>
+                <TableHeaderCell>Laser Intensity</TableHeaderCell>
+                <TableHeaderCell>Safety Check</TableHeaderCell>
+                <TableHeaderCell>Validation Code</TableHeaderCell>
+                <TableHeaderCell>Outcome Status</TableHeaderCell>
+                <TableHeaderCell>Actions</TableHeaderCell>
+            </TableRow>
+        </TableHeader>
+        <TableBody>
+            @{
+                foreach (var device in FilteredDevices)
+                {
+                    <TableRow>
+                        <TableRowHeader>@device.DeviceID</TableRowHeader>
+                        <TableRowCell>@device.Name</TableRowCell>
+                        <TableRowCell>@device.DeviceType</TableRowCell>
+                        <TableRowCell>@device.LaserIntensityDisplay</TableRowCell>
+                        <TableRowCell> @device.SafetyCheckDisplay</TableRowCell>
+                        <TableRowCell> @device.ValidationCodeDisplay</TableRowCell>
+                        <TableRowCell>@device.OutcomeStatusDisplay</TableRowCell>
+                        <TableRowCell>
+                            <!-- Edit Icon -->
+                            <button class="btn btn-link" @onclick="()=> EditDevice(device.DeviceID)">
+                                <i class="fas fa-edit"></i>
+                            </button>
 
-                        <!-- Delete Icon -->
-                        <button class="btn btn-link text-danger" @onclick="()=> DeviceService.RemoveDevice(device.DeviceID)">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </TableRowCell>
+                            <!-- Delete Icon -->
+                            <button class="btn btn-link text-danger" @onclick="()=> DeviceService.RemoveDevice(device.DeviceID)">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </TableRowCell>
 
 
-                </TableRow>
+                    </TableRow>
 
+                }
             }
-        }
-    </TableBody>
-</Table>
+        </TableBody>
+    </Table>
+}
+
 
 
 @code {
     [Parameter]
     public List<Device> Devices { get; set; }
     [Parameter] public EventCallback<Device> ShowEditModal { get; set; }
+    private List<DeviceViewModel> FilteredDevices { get; set; }
+    [Parameter] public EventCallback<Task> Refresh { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAllDevices();
+    }
+    public async Task LoadAllDevices()
+    {
+        Devices = DeviceService.GetDevices();
+
+        // Project each device into the DeviceViewModel with conditional properties
+        FilteredDevices = Devices.Select(device =>
+        {
+            // Use type checking to handle specific device types
+            if (device is LaserDevice laserCutterDevice)
+            {
+                return new DeviceViewModel
+                    {
+                        DeviceID = laserCutterDevice.DeviceID,
+                        Name = laserCutterDevice.Name,
+                        DeviceType = laserCutterDevice.DeviceType,
+                        LaserIntensityDisplay = laserCutterDevice.LaserIntensity.ToString(),
+                        SafetyCheckDisplay = laserCutterDevice.SafetyCheckRequired ? "Required" : "Not Required",
+                        ValidationCodeDisplay = "NA",
+                        OutcomeStatusDisplay = "NA"
+                    };
+            }
+            else if (device is QualityAssuranceScannerDevice qaScannerDevice)
+            {
+                return new DeviceViewModel
+                    {
+                        DeviceID = qaScannerDevice.DeviceID,
+                        Name = qaScannerDevice.Name,
+                        DeviceType = qaScannerDevice.DeviceType,
+                        LaserIntensityDisplay = "NA",
+                        SafetyCheckDisplay = "NA",
+                        ValidationCodeDisplay = qaScannerDevice.ValidationCode.ToString(),
+                        OutcomeStatusDisplay = qaScannerDevice.OutcomeStatus.ToString()
+                    };
+            }
+            else
+            {
+                // Default mapping for other device types
+                return new DeviceViewModel
+                    {
+                        DeviceID = device.DeviceID,
+                        Name = device.Name,
+                        DeviceType = device.DeviceType,
+                        LaserIntensityDisplay = "NA",
+                        SafetyCheckDisplay = "NA",
+                        ValidationCodeDisplay = "NA",
+                        OutcomeStatusDisplay = "NA"
+                    };
+            }
+        }).ToList();
+    }
+
 
     public async Task EditDevice(int deviceId)
     {

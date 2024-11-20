@@ -6,7 +6,7 @@
 @inject IOperationService OperationService
 @inject IDeviceService DeviceService
 
-<h1>Assembly Line Process</h1>
+<h2 class="my-4">Assembly Line Process</h2>
 
 <Tabs SelectedTab="@selectedTab" SelectedTabChanged="@OnSelectedTabChanged">
     <Items>
@@ -23,7 +23,7 @@
                 </div>
                 <div class="row my-2">
                      <div class="col-12 mx-0">
-                    <DeviceList Devices="DeviceService.GetDevices()" ShowEditModal="OpenDeviceModal" />
+                        <DeviceList Devices="DeviceService.GetDevices()" ShowEditModal="OpenDeviceModal" @ref="deviceLisComponentt" />
                     </div>
                 </div>
             </div>
@@ -79,7 +79,8 @@
     private Modal _operationModalRef;
     private Operation selectedOperation = new Operation();
     private Device selectedDevice = new Device();
-    string selectedTab = "operation";
+    string selectedTab = "device";
+    protected DeviceList deviceLisComponentt;
 
     private Task OnSelectedTabChanged(string name)
     {
@@ -92,6 +93,7 @@
     {
         await _operationModalRef.Hide();
         await _deviceModalRef.Hide();
+       await  deviceLisComponentt.LoadAllDevices();
     }
     private async Task OpenOpModal(Operation operation)
     {

@@ -13,11 +13,14 @@ namespace Jendamark.Assignment.Models
         [Required(ErrorMessage = "Device Type is required")]
         public DeviceType DeviceType { get; set; }
 
-        public int LaserIntensity { get; set; } 
-
-        public bool? SafetyCheckRequired { get; set; }
-
-        // For QualityAssuranceScanner-specific properties
+    }
+    public class LaserDevice : Device
+    {
+        public int LaserIntensity { get; set; }
+        public bool SafetyCheckRequired { get; set; }
+    }
+    public class QualityAssuranceScannerDevice : Device
+    {
         [StringLength(50, ErrorMessage = "Validation Code cannot exceed 50 characters")]
         [Required(ErrorMessage = "Validation Code is required")]
         public string ValidationCode { get; set; }

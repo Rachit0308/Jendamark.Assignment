@@ -2,6 +2,8 @@
 @using Jendamark.Assignment.Services.Interfaces
 @inject IOperationService OperationService
 
+@if (Operations?.Count > 0)
+{
     <Table>
         <TableHeader ThemeContrast="ThemeContrast.Dark">
             <TableRow>
@@ -43,6 +45,8 @@
             }
         </TableBody>
     </Table>
+
+    }
 
 
 @code {

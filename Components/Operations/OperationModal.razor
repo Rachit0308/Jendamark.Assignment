@@ -27,11 +27,11 @@
             </Field>
             <Field>
                 <FieldLabel>Device</FieldLabel>
-                <select class="form-control" @onchange="OnDeviceSelected">
-                    <option selected="@((selectedDeviceID == "0") ? "selected" : null)" value="0">-- Select Device --</option>
+                <select class="form-control" @bind="selectedDeviceID">
+                    <option value="0">-- Select Device --</option>
                     @foreach (var device in DeviceList)
                     {
-                        <option selected="@((device.DeviceID.ToString() == selectedDeviceID) ? "selected" : null)" value="@device.DeviceID">@device.Name</option>
+                        <option value="@device.DeviceID">@device.Name</option>
                     }
                 </select>
                 @if (showDeviceError)
@@ -88,27 +88,32 @@
         }
     }
 
-    private string selectedDeviceID = "0";
+    private int selectedDeviceID = 0;
     private int operationIdCounter = 1;
     Validations validations = new Validations();
     private string msgAlert = "";
     private bool showDeviceError = false;
 
-    private void OnDeviceSelected(ChangeEventArgs e)
+    protected override async Task OnParametersSetAsync()
     {
-        // Parse the selected DeviceID and find the corresponding Device object
-        selectedDeviceID = e.Value.ToString();
-        newOperation.Device = DeviceList.FirstOrDefault(d => d.DeviceID == Convert.ToInt16(selectedDeviceID));
+        selectedDeviceID = newOperation.Device?.DeviceID ?? 0;
     }
+    // private void OnDeviceSelected(ChangeEventArgs e)
+    // {
+    //     // Parse the selected DeviceID and find the corresponding Device object
+    //     selectedDeviceID = e.Value.ToString();
+       
+    // }
 
     private async Task SaveOperation()
     {
         showDeviceError = false;
         if (await validations.ValidateAll())
         {
+            newOperation.Device = DeviceList.FirstOrDefault(d => d.DeviceID == Convert.ToInt16(selectedDeviceID));
             var listOperations = OperationService.GetOperations();
             var isOrderAlreadyExists = listOperations.Any(op => op.Order == newOperation.Order);
-            if (selectedDeviceID == "0")
+            if (selectedDeviceID == 0)
             {
                 showDeviceError = true;
                 return;
@@ -153,6 +158,7 @@
     }
     private async Task UpdateOperation()
     {
+        newOperation.Device = DeviceList.FirstOrDefault(d => d.DeviceID == Convert.ToInt16(selectedDeviceID));
         OperationService.UpdateOperation(newOperation);
         newOperation = new Operation();
         await OnClose.InvokeAsync(true);
